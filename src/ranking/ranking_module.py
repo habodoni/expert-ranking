@@ -41,16 +41,24 @@ class RankingModule:
         final_score = (0.7 * similarity) + (0.2 * skill_score) + (0.1 * experience_score)
         return final_score, similarity, skill_score, experience_score, matched_skills
 
-    def rank_experts(self, candidate_desc, experts):
-        expert_texts = [f"{e['title']} in {e['industry']} with {e['years_experience']} years. Skills: {', '.join(e['skills'])}."
-                        for e in experts]
-        expert_embeddings = self.embedding_engine.batch_embed_texts(expert_texts)
-        candidate_embedding = self.embedding_engine.embed(candidate_desc)
-
+    def rank_experts(self, candidate_desc, experts, extracted_keywords=None, min_experience=0, limit=10):
+        """
+        Rank experts based on relevance to the candidate description.
+        Args:
+            candidate_desc (str): The input description.
+            experts (list): List of expert profiles.
+            extracted_keywords (list): Dynamically extracted keywords from the description.
+            min_experience (int): Minimum years of experience required.
+            limit (int): Maximum number of experts to return.
+        Returns:
+            list: Top `limit` ranked experts with their scores.
+        """
         scored = []
-        for expert, expert_embedding in zip(experts, expert_embeddings):
-            similarity = float(util.cos_sim(candidate_embedding, expert_embedding)[0][0])
-            final_score, similarity, skill_score, experience_score, matched_skills = self.compute_score(candidate_desc, expert)
+        for expert in experts:
+            # Compute score for each expert
+            final_score, similarity, skill_score, experience_score, matched_skills = self.compute_score(
+                candidate_desc, expert, extracted_keywords, min_experience
+            )
             scored.append({
                 "expert": expert,
                 "final_score": final_score,
@@ -59,5 +67,9 @@ class RankingModule:
                 "experience_score": experience_score,
                 "matched_skills": matched_skills
             })
+
+        # Sort by final score in descending order
         scored = sorted(scored, key=lambda x: x['final_score'], reverse=True)
-        return scored[:100]
+
+        # Return only the top `limit` experts
+        return scored[:limit]

@@ -1,10 +1,14 @@
 import sqlite3
 
-# Connect to the database (this will create experts.db)
-conn = sqlite3.connect('experts.db')
+# Connect to the database (creates the file if it doesn't exist)
+db_path = 'experts.db'
+conn = sqlite3.connect(db_path)
 cursor = conn.cursor()
 
-# Create the experts table
+# Debug: Check connection
+print(f"Connected to database: {db_path}")
+
+# Create the `experts` table
 cursor.execute("""
 CREATE TABLE IF NOT EXISTS experts (
     id INTEGER PRIMARY KEY,
@@ -19,10 +23,12 @@ CREATE TABLE IF NOT EXISTS experts (
     availability BOOLEAN
 );
 """)
+print("Table `experts` created or already exists.")
 
-# Insert sample data if the table is empty
+# Insert sample data
 cursor.execute("SELECT COUNT(*) FROM experts;")
 if cursor.fetchone()[0] == 0:
+    print("Inserting sample data into `experts` table...")
     sample_data = [
         ('Jane Doe', 'Senior Compliance Consultant', 'FinTech', 10, 'fraud detection,CRM integration,compliance consulting', 'Acme Consulting', 'CAMS', 'English,Spanish', 1),
         ('John Smith', 'AI Solutions Architect', 'FinTech', 6, 'fraud detection,AI-driven analysis,compliance', 'ProNexus', 'AWS Certified', 'English', 1),
@@ -32,8 +38,11 @@ if cursor.fetchone()[0] == 0:
     INSERT INTO experts (name, title, industry, years_experience, skills, company_affiliation, certifications, languages, availability)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, sample_data)
+    print("Sample data inserted.")
+else:
+    print("Sample data already exists. Skipping insertion.")
 
+# Commit and close
 conn.commit()
 conn.close()
-
-print("Database created and populated as experts.db")
+print("Database creation complete.")

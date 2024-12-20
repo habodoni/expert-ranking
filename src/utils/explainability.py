@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+
 class ExplanationEngine:
     def extract_keywords(self, description, max_features=10):
         """
@@ -12,17 +15,26 @@ class ExplanationEngine:
         Returns:
             list: A list of the most relevant keywords.
         """
+        # Handle edge case: empty or None description
+        if not description or not isinstance(description, str) or description.strip() == "":
+            print("Error: Empty or invalid candidate description provided.")
+            return []
+
         # Define custom stopwords
         domain_stopwords = {"expert", "looking", "need", "experience", "with"}
-        custom_stopwords = list(ENGLISH_STOP_WORDS.union(domain_stopwords))  # Convert to list
+        custom_stopwords = list(ENGLISH_STOP_WORDS.union(domain_stopwords))
 
         # TF-IDF vectorization
-        vectorizer = TfidfVectorizer(stop_words=custom_stopwords, max_features=max_features)
-        tfidf_matrix = vectorizer.fit_transform([description])
+        try:
+            vectorizer = TfidfVectorizer(stop_words=custom_stopwords, max_features=max_features)
+            tfidf_matrix = vectorizer.fit_transform([description])
 
-        # Extract keywords based on feature importance
-        keywords = vectorizer.get_feature_names_out()
-        return list(keywords)
+            # Extract keywords based on feature importance
+            keywords = vectorizer.get_feature_names_out()
+            return list(keywords)
+        except Exception as e:
+            print(f"Error during keyword extraction: {e}")
+            return []
 
 
     def generate_explanation(self, entry, candidate_desc, rank):
@@ -31,7 +43,7 @@ class ExplanationEngine:
         skills_match_percentage = entry['skill_score'] * 100
         experience_percentage = entry['experience_score'] * 100
 
-        # Construct dynamic summary
+        # Construct dynamic summary based on scores
         emphasis = []
         if similarity_percentage >= 70:
             emphasis.append(f"strong similarity of {similarity_percentage:.0f}% with the candidate description")
@@ -40,6 +52,7 @@ class ExplanationEngine:
         if experience_percentage > 0:
             emphasis.append(f"experience meeting {experience_percentage:.0f}% of the target years")
 
+        # Assign a default value to summary
         if emphasis:
             if rank == 1:
                 summary = f"{expert['name']} was ranked 1st due to their " + ", ".join(emphasis) + "."
@@ -47,13 +60,17 @@ class ExplanationEngine:
                 summary = f"{expert['name']} was ranked 2nd, showing " + ", ".join(emphasis) + "."
             elif rank == 3:
                 summary = f"{expert['name']} was ranked 3rd because of their " + ", ".join(emphasis) + "."
+            else:
+                summary = f"{expert['name']} was ranked {rank}th due to their " + ", ".join(emphasis) + "."
         else:
-            summary = f"{expert['name']} was ranked lower due to insufficient match across key criteria."
+            # Default fallback summary if no emphasis is found
+            summary = f"{expert['name']} was ranked {rank}th due to limited alignment with the candidate description."
 
+        # Generate explanation output
         explanation = (
             f"Name: {expert['name']}\n"
             f"Score Breakdown:\n"
-            f"  - Similarity to Candidate Description: {similarity_percentage:.0f}%\n"
+            f"  - Similarity: {similarity_percentage:.0f}%\n"
             f"  - Skills Match: {skills_match_percentage:.0f}% of key requested skills\n"
             f"  - Relevant Experience: {experience_percentage:.0f}% of the minimum required\n"
             f"Summary: {summary}\n"

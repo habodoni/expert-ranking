@@ -53,26 +53,14 @@ if st.button("Find Experts"):
         if not filtered_experts:
             st.warning("No experts match your criteria. Try adjusting the filters.")
         else:
-            # Rank filtered experts
-            ranked_experts = []
-            for expert in filtered_experts:
-                final_score, similarity, skill_score, experience_score, matched_skills = ranking_module.compute_score(
-                    candidate_desc=candidate_description,
-                    expert=expert,
-                    extracted_keywords=extracted_keywords,
-                    min_experience=min_experience
-                )
-                ranked_experts.append({
-                    "expert": expert,
-                    "final_score": final_score,
-                    "similarity": similarity,
-                    "skill_score": skill_score,
-                    "experience_score": experience_score,
-                    "matched_skills": matched_skills
-                })
-
-            # Sort experts by final score
-            ranked_experts = sorted(ranked_experts, key=lambda x: x['final_score'], reverse=True)
+            # Rank filtered experts and limit to top 10
+            ranked_experts = ranking_module.rank_experts(
+                candidate_desc=candidate_description,
+                experts=filtered_experts,
+                extracted_keywords=extracted_keywords,
+                min_experience=min_experience,
+                limit=10  # Limit results to the top 10 experts
+            )
 
             # Display results
             st.write("### Ranked Experts:")
@@ -82,5 +70,6 @@ if st.button("Find Experts"):
                 st.text(explanation)
     else:
         st.error("Please enter a valid description.")
+
 
 
