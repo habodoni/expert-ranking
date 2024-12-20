@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Jane Doe",
+    "title": "Senior Compliance Consultant",
+    "industry": "FinTech",
+    "years_experience": 10,
+    "skills": ["fraud detection", "CRM integration", "compliance consulting"],
+    "company_affiliation": "Acme Consulting"
+  },
+  {
+    "name": "John Smith",
+    "title": "AI Solutions Architect",
+    "industry": "FinTech",
+    "years_experience": 6,
+    "skills": ["fraud detection", "AI-driven analysis", "compliance"],
+    "company_affiliation": "ProNexus"
+  },
+  {
+    "name": "Sarah Lee",
+    "title": "CRM Specialist",
+    "industry": "SaaS",
+    "years_experience": 4,
+    "skills": ["CRM integration", "Customer onboarding"],
+    "company_affiliation": "GlobalTech"
+  }
+]
