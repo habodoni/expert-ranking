@@ -2,7 +2,7 @@ import sqlite3
 
 def initialize_database():
     # Connect to the database (creates file if it doesn't exist)
-    conn = sqlite3.connect('../../experts.db')
+    conn = sqlite3.connect('../experts.db')
     cursor = conn.cursor()
 
     # Create table
