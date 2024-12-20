@@ -15,7 +15,6 @@ if not os.path.exists(db_path):
     print("Initializing database...")
     initialize_database()
 
-
 # Initialize components
 loader = DataLoader('experts.db')
 experts = loader.load_experts()
