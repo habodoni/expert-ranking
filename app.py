@@ -6,10 +6,15 @@ from src.embeddings.embedding_engine import EmbeddingEngine
 from src.ranking.ranking_module import RankingModule
 from src.utils.explainability import ExplanationEngine
 
-# Initialize database
-if not os.path.exists('experts.db'):
-    st.write("Setting up the database...")
+import os
+from src.data.initialize_database import initialize_database
+
+# Ensure the database is initialized
+db_path = os.path.join(os.getcwd(), 'experts.db')
+if not os.path.exists(db_path):
+    print("Initializing database...")
     initialize_database()
+
 
 # Initialize components
 loader = DataLoader('experts.db')
