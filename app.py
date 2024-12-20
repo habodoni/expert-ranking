@@ -1,26 +1,22 @@
+import sqlite3
 import streamlit as st
-import os
-from src.data.initialize_database import initialize_database
 from src.utils.data_loader import DataLoader
 from src.embeddings.embedding_engine import EmbeddingEngine
 from src.ranking.ranking_module import RankingModule
 from src.utils.explainability import ExplanationEngine
 
-import os
-from src.data.initialize_database import initialize_database
-
-# Ensure the database is initialized
-db_path = os.path.join(os.getcwd(), 'experts.db')
-if not os.path.exists(db_path):
-    print("Initializing database...")
-    initialize_database()
+# Ensure database exists
+db_path = 'src/data/experts.db'  # Use the pre-built database
+conn = sqlite3.connect(db_path)
+conn.close()
 
 # Initialize components
-loader = DataLoader('experts.db')
+loader = DataLoader(db_path)
 experts = loader.load_experts()
 embedding_engine = EmbeddingEngine()
 ranking_module = RankingModule(embedding_engine)
 explanation_engine = ExplanationEngine()
+
 
 # Streamlit UI
 st.title("Dynamic Expert Ranking System")

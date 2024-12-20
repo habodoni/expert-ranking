@@ -5,14 +5,11 @@ class DataLoader:
         self.conn = sqlite3.connect(db_path)
 
     def load_experts(self, filters=None):
-        """
-        Load experts from the database, applying filters dynamically.
-        """
         cursor = self.conn.cursor()
         query = "SELECT * FROM experts WHERE 1=1"
         params = []
 
-        # Apply filters
+        # Apply filters dynamically
         if filters:
             if 'industry' in filters and filters['industry'] != 'Any':
                 query += " AND industry = ?"
@@ -26,9 +23,17 @@ class DataLoader:
                     query += " AND skills LIKE ?"
                     params.append(f"%{skill.strip()}%")
 
+        # Debugging: Print the query and parameters
+        print(f"Executing Query: {query}")
+        print(f"Parameters: {params}")
+
         # Execute query
-        cursor.execute(query, params)
-        rows = cursor.fetchall()
+        try:
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+        except sqlite3.OperationalError as e:
+            print(f"SQL Execution Error: {e}")
+            raise
 
         # Convert rows to dictionaries
         experts = [
@@ -47,4 +52,3 @@ class DataLoader:
             for row in rows
         ]
         return experts
-
